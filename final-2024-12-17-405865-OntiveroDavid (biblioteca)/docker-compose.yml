@@ -1,0 +1,87 @@
+
+services:
+
+  # API Gateway
+  api-gateway:
+  # TODO
+  # Completar microservicio
+  # puerto 8080
+    image: api-gateway-image  # Reemplaza con la imagen correcta
+    container_name: api-gateway
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - library-network
+    depends_on:
+      - clientes-service
+      - biblioteca-service
+
+
+  # Clientes Service
+  clientes-service:
+  # TODO
+  # Completar microservicio
+  # puerto 8081
+    image: clientes-service-image  # Reemplaza con la imagen correcta
+    container_name: clientes-service
+    build:
+      context: ./clientes-service
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    networks:
+      - library-network
+    depends_on:
+      - mysql-db
+
+  # Biblioteca Service
+  biblioteca-service:
+  # TODO
+  # Completar microservicio
+  # puerto 8082
+    image: biblioteca-service-image  # Reemplaza con la imagen correcta
+    container_name: biblioteca-service
+    build:
+      context: ./biblioteca-service
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+    networks:
+      - library-network
+    depends_on:
+      - mysql-db
+      - clientes-service
+
+
+  # Servicio de base de datos MySQL
+  mysql-db:
+    image: mysql:8.0
+    container_name: biblioteca_db-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: biblioteca_db
+      MYSQL_USER: tup
+      MYSQL_PASSWORD: tup
+    ports:
+      - "3307:3306"
+    expose:
+      - "3307"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+# Volumen persistente para la base de datos
+volumes:
+  mysql-data:
+
+networks:
+  library-network:
+    driver: bridge
